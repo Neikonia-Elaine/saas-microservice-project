@@ -1,0 +1,65 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5432/microserver_db
+    username: fanzhiyuan
+    password:
+
+  kafka:
+    bootstrap-servers: localhost:9094
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      acks: all
+      properties:
+        enable:
+          idempotence: true
+        max:
+          in:
+            flight:
+              requests:
+                per:
+                  connection: 5
+
+  cloud:
+    gateway:
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "*"
+            allowedMethods: "*"
+            allowedHeaders: "*"
+      routes:
+        - id: ingest
+          uri: no://op
+          predicates:
+            - Path=/api/v1/ingest/**
+
+        # More specific route must come before the broader /admin/** route
+        - id: query-service
+          uri: lb://QUERY-SERVICE
+          predicates:
+            - Path=/api/v1/admin/query/**
+
+        - id: analysis-service
+          uri: lb://ANALYSIS-SERVICE
+          predicates:
+            - Path=/api/v1/admin/reports/**
+
+        - id: tenant-service
+          uri: lb://TENANT-SERVICE
+          predicates:
+            - Path=/api/v1/admin/**
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+
+jwt:
+  secret: J5bTVqv5h2RREWAqLshZ+f2oWG8IqirEcRYLAFI8nXI=

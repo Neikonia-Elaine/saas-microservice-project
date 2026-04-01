@@ -1,0 +1,33 @@
+server:
+  port: 8085
+
+spring:
+  application:
+    name: analysis-service
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/microserver_db
+    username: fanzhiyuan
+    password:
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  # Load .env file as properties (KEY=VALUE format, no quotes)
+  config:
+    import: optional:file:.env[.properties]
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+
+openai:
+  api-key: ${OPENAI_API_KEY}
+  base-url: https://api.openai.com/v1
+  model: gpt-4o-mini
